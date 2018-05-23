@@ -50,12 +50,12 @@ module Bronto
     def self.api(api_key, refresh = false)
       return connection_cache[api_key][:client] unless refresh || session_expired(api_key) || connection_cache[api_key].nil?
 
-      client = Savon.client(wsdl: 'https://testapi.bronto.com/v4?wsdl', ssl_version: :TLSv1_2)
+      client = Savon.client(wsdl: 'https://api.bronto.com/v4?wsdl', ssl_version: :TLSv1_2)
       resp = client.call(:login, message: { api_token: api_key })
 
       connection_cache[api_key] = {
         client: Savon.client(
-          wsdl: 'https://testapi.bronto.com/v4?wsdl',
+          wsdl: 'https://api.bronto.com/v4?wsdl',
           soap_header: {
             "tns:sessionHeader" => { session_id: resp.body[:login_response][:return] }
           },
