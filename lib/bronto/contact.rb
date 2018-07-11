@@ -18,11 +18,11 @@ module Bronto
       Array.wrap(resp[:return]).map { |hash| new(hash) }
     end
 
-    def self.save(*objs)
+    def self.save(*objs, force_udpate = false)
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
-
-      resp = request(:add_or_update, {plural_class_name => objs.map(&:to_hash)})
+      operation = force_update ? :update : :add_or_update
+      resp = request(operation, {plural_class_name => objs.map(&:to_hash)})
 
       objs.each { |o| o.errors.clear }
 
@@ -35,6 +35,10 @@ module Bronto
       end
 
       objs
+    end
+    
+    def self.update(*objs)
+      save(objs, true)
     end
 
     def initialize(options = {})
@@ -62,6 +66,10 @@ module Bronto
 
     def save
       self.class.save(self)
+    end
+    
+    def update
+      self.class.update(self)
     end
 
     def to_hash
