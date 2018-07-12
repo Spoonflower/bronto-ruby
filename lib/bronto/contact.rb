@@ -40,7 +40,7 @@ module Bronto
     def change_status(status)
       api_key = self.api_key
       
-      resp = request(:update, {plural_class_name => [{:id => self.id, :status => status}]})
+      resp = request(:update, {self.class.plural_class_name => [{:id => self.id, :status => status}]})
 
       self.errors.clear
       results = resp[:return][:results]
