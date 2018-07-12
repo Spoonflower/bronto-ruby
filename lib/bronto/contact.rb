@@ -23,7 +23,7 @@ module Bronto
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
       
       resp = request(:add_or_update, {plural_class_name => objs.map(&:to_hash)})
-
+      
       objs.each { |o| o.errors.clear }
 
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
@@ -37,23 +37,15 @@ module Bronto
       objs
     end
     
-    def self.update(*objs)
-      objs = objs.flatten
-      api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
+    def change_status(status)
+      api_key = self.api_key
       
-      resp = request(:update, {plural_class_name => objs.map(&:to_hash)})
+      resp = request(:update, {plural_class_name => [{:id => self.id, :status => status}]})
 
-      objs.each { |o| o.errors.clear }
-
-      Array.wrap(resp[:return][:results]).each_with_index do |result, i|
-        if result[:is_error]
-          objs[i].errors.add(result[:error_code], result[:error_string])
-        else
-          objs[i].id = result[:id]
-        end
-      end
-
-      objs
+      self.errors.clear
+      results = resp[:return][:results]
+      self.errors.add(result[:error_code], result[:error_string]) if result[:is_error]
+      return self
     end
 
     def initialize(options = {})
@@ -82,16 +74,12 @@ module Bronto
     def save
       self.class.save(self)
     end
-    
-    def update
-      self.class.update(self)
-    end
 
     def to_hash
       if id.present?
-        { id: id, email: email, status: status, fields: fields.values.map(&:to_hash) }
+        { id: id, email: email, fields: fields.values.map(&:to_hash) }
       else
-        { email: email, status: status, fields: fields.values.map(&:to_hash) }
+        { email: email, fields: fields.values.map(&:to_hash) }
       end
     end
 
