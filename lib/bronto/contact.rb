@@ -43,7 +43,7 @@ module Bronto
       resp = request(:update, {self.class.plural_class_name => [{:id => self.id, :status => status}]})
 
       self.errors.clear
-      results = resp[:return][:results]
+      result = resp[:return][:results].first
       self.errors.add(result[:error_code], result[:error_string]) if result[:is_error]
       return self
     end
