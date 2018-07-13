@@ -45,7 +45,7 @@ module Bronto
       self.errors.clear
       result = resp[:return][:results]
       self.errors.add(result[:error_code], result[:error_string]) if result[:is_error]
-      return self
+      self
     end
 
     def initialize(options = {})
