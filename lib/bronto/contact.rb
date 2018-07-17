@@ -21,9 +21,9 @@ module Bronto
     def self.save(*objs)
       objs = objs.flatten
       api_key = objs.first.is_a?(String) ? objs.shift : self.api_key
-
+      
       resp = request(:add_or_update, {plural_class_name => objs.map(&:to_hash)})
-
+      
       objs.each { |o| o.errors.clear }
 
       Array.wrap(resp[:return][:results]).each_with_index do |result, i|
@@ -35,6 +35,17 @@ module Bronto
       end
 
       objs
+    end
+    
+    def change_status(status)
+      api_key = self.api_key
+      
+      resp = request(:update, {self.class.plural_class_name => [{:id => self.id, :status => status}]})
+
+      self.errors.clear
+      result = resp[:return][:results]
+      self.errors.add(result[:error_code], result[:error_string]) if result[:is_error]
+      self
     end
 
     def initialize(options = {})
